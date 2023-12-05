@@ -2,7 +2,6 @@
 import rclpy
 from rclpy.node import Node
 import cv2
-import numpy as np
 
 class CameraNode(Node):
     def __init__(self):
@@ -39,7 +38,8 @@ class CameraNode(Node):
             if ret:
                 cv2.imshow("Preview", frame)
                 self.get_logger().info("Image should be visible, image sum = " + str(frame.sum()))
-                key = cv2.waitKey(1) # Wait key needed for output
+                cv2.waitKey(1) # Wait key needed for output
+                
             else:
                 self.get_logger().info("Failed to open self.camera: /dev/video0")
         else:
