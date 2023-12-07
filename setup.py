@@ -18,7 +18,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            "camera_node = turtle_controller.camera_node:main"
+            "robot_mover = turtle_controller.robot_mover:main"
         ],
     },
 )
