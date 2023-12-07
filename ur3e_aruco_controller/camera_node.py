@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
-from sensor_msgs.msg import Image
+from geometry_msgs.msg import Point
 from cv_bridge import CvBridge
+import numpy as np
 import cv2
 
 class CameraNode(Node):
@@ -14,7 +15,7 @@ class CameraNode(Node):
 
         self.camera = cv2.VideoCapture(self.cameraDevice.value)
         SPF = 1.0 / float(self.cameraFPS.value) # 'seconds per frame'
-        self.create_publisher(Image, "CameraNodeImage", 10)
+        self.centerPointPublisher = self.create_publisher(Point, "ArUcoCenter", 10)
 
         self.arucoDict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_50)
         self.arucoParams = cv2.aruco.DetectorParameters()
@@ -30,15 +31,19 @@ class CameraNode(Node):
         self.declare_parameter("CameraFPS", "30")
         self.declare_parameter("ShowPreview", "true")
         self.declare_parameter("CameraDevice", "/dev/video0")
+        self.declare_parameter("ArUcoID", "0")
 
     def getAllParams(self):
         self.cameraFPS = self.get_parameter("CameraFPS")
         self.showPreview = self.get_parameter("ShowPreview")
         self.cameraDevice = self.get_parameter("CameraDevice")
+        self.arucoID = self.get_parameter("ArUcoID")
 
     def timer_callback(self):
         frame = self.getFrame()
         corners = self.detectArUcoCorners(frame)
+        if corners != None:
+            self.centerPointPublisher.publish(self.getArUcoCenter(corners))
 
 
     def getFrame(self):
@@ -53,23 +58,31 @@ class CameraNode(Node):
 
     def detectArUcoCorners(self, frame):
         (corners, ids, rejected) = self.detector.detectMarkers(frame)
-        return corners
+        if len(corners) > 0:
+            for id in ids:
+                if id[0] == int(self.arucoID.value):
+                    return corners
+            self.get_logger().info("ID: " + str(self.arucoID.value) + " not found!")
+        return None
 
-    def getAvgCornerY(self, corners):
-        avgy = 0
-        for corner in corners:
-            avgy += corner.y
-        avgy /= len(corners)
-        return avgy
+    def getArUcoCenter(self, corners):
+        center = Point()
+        for y, x in corners[0][0]:
+            center.x += float(x)
+            center.y += float(y)
+        center.x /= 4
+        center.y /= 4
+        center.z = float(0.0)
+        return center
 
     def showFrame(self):
         frame = self.getFrame()
-        cv2.imshow("Preview", frame)
-        self.get_logger().info("Image should be visible, image sum = " + str(frame.sum()))
         corners = self.detectArUcoCorners(frame)
-        for corner in corners:
-            self.get_logger().info("ArUco visible at: " + str(corner[0][0][1]))
-
+        if corners != None:
+            center = self.getArUcoCenter(corners)
+            frame[int(center.x)-5:int(center.x)+5, int(center.y)-5:int(center.y)+5] = (0, 0, 255)
+            self.centerPointPublisher.publish(center)
+        cv2.imshow("Preview", frame)
 
     def __del__(self):
         cv2.destroyAllWindows()

@@ -1,5 +1,5 @@
 import rclpy
-from turtle_controller.camera_node import CameraNode
+from ur3e_aruco_controller.camera_node import CameraNode
 
 def main(args=None):
     rclpy.init(args=args)

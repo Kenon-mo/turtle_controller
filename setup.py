@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'turtle_controller'
+package_name = 'ur3e_aruco_controller'
 
 setup(
     name=package_name,
@@ -18,7 +18,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            "robot_mover = turtle_controller.robot_mover:main"
+            "robot_mover = ur3e_aruco_controller.robot_mover:main"
         ],
     },
 )
