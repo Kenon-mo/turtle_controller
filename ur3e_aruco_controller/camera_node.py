@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
+from std_msgs.msg import Bool
 from geometry_msgs.msg import Point
 from cv_bridge import CvBridge
 import numpy as np
@@ -15,7 +16,7 @@ class CameraNode(Node):
 
         self.camera = cv2.VideoCapture(self.cameraDevice.value)
         SPF = 1.0 / float(self.cameraFPS.value) # 'seconds per frame'
-        self.centerPointPublisher = self.create_publisher(Point, "ArUcoCenter", 10)
+        self.centerPointPublisher = self.create_publisher(Bool, "ArUcoCenterAboveHalf", 10)
 
         self.arucoDict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_50)
         self.arucoParams = cv2.aruco.DetectorParameters()
@@ -67,7 +68,7 @@ class CameraNode(Node):
 
     def getArUcoCenter(self, corners):
         center = Point()
-        for y, x in corners[0][0]:
+        for x, y in corners[0][0]:
             center.x += float(x)
             center.y += float(y)
         center.x /= 4
@@ -80,8 +81,15 @@ class CameraNode(Node):
         corners = self.detectArUcoCorners(frame)
         if corners != None:
             center = self.getArUcoCenter(corners)
-            frame[int(center.x)-5:int(center.x)+5, int(center.y)-5:int(center.y)+5] = (0, 0, 255)
-            self.centerPointPublisher.publish(center)
+            y, x, canals = frame.shape
+            frame[int(center.y)-5:int(center.y)+5, int(center.x)-5:int(center.x)+5] = (0, 0, 255)
+            frame[int(y/2), 0:x] = (0, 255, 0)
+            mes = Bool()
+            if center.y < y/2:
+                mes.data = True
+            else:
+                mes.data = False
+            self.centerPointPublisher.publish(mes)
         cv2.imshow("Preview", frame)
 
     def __del__(self):
