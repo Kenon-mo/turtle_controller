@@ -43,9 +43,15 @@ class CameraNode(Node):
     def timer_callback(self):
         frame = self.getFrame()
         corners = self.detectArUcoCorners(frame)
+        y, x, canals = frame.shape
         if corners != None:
-            self.centerPointPublisher.publish(self.getArUcoCenter(corners))
-
+            center = self.getArUcoCenter(corners)
+            mes = Bool()
+            if center.y < y/2:
+                mes.data = True
+            else:
+                mes.data = False
+            self.centerPointPublisher.publish(mes)
 
     def getFrame(self):
         if self.camera.isOpened():
@@ -79,11 +85,11 @@ class CameraNode(Node):
     def showFrame(self):
         frame = self.getFrame()
         corners = self.detectArUcoCorners(frame)
+        y, x, canals = frame.shape
+        frame[int(y/2), 0:x] = (0, 255, 0)
         if corners != None:
             center = self.getArUcoCenter(corners)
-            y, x, canals = frame.shape
             frame[int(center.y)-5:int(center.y)+5, int(center.x)-5:int(center.x)+5] = (0, 0, 255)
-            frame[int(y/2), 0:x] = (0, 255, 0)
             mes = Bool()
             if center.y < y/2:
                 mes.data = True
