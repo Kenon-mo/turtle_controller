@@ -16,7 +16,7 @@ class CameraNode(Node):
 
         self.camera = cv2.VideoCapture(self.cameraDevice.value)
         SPF = 1.0 / float(self.cameraFPS.value) # 'seconds per frame'
-        self.centerPointPublisher = self.create_publisher(Bool, "ArUcoCenterAboveHalf", 10)
+        self.centerPointPublisher = self.create_publisher(Bool, "/ArUcoCenterAboveHalf", 10)
 
         self.arucoDict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_50)
         self.arucoParams = cv2.aruco.DetectorParameters()

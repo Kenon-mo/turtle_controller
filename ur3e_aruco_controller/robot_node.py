@@ -11,18 +11,42 @@ import cv2
 class RobotNode(Node):
     def __init__(self):
         super().__init__("RobotNode")
-
-        self.subscriber = self.create_subscription(Bool, "ArUcoCenterAboveHalf", self.subscription_callback, 10)
+        self.subscriber = self.create_subscription(Bool, "/ArUcoCenterAboveHalf", self.subscription_callback, 10)
+        self.subscriber # prevent unused variable warning
         self.prev_message = False # Previous message - change position only on posedge/negedge
-        self.jointPublisher = self.create_publisher(JointTrajectory, "scaled_joint_trajectory_controller/joint_trajectory", 10)
+        self.jointPublisher = self.create_publisher(JointTrajectory, "/scaled_joint_trajectory_controller/joint_trajectory", 10)
+        self.get_logger().info("RobotNode created!")
 
     def subscription_callback(self, msg):
-        if msg.value != self.prev_message: 
-            trajectory = JointTrajectory(
-            joint_names=['elbow_joint'],
-            points=[
-                JointTrajectoryPoint(positions=0, time_from_start=Duration(sec=6, nanosec=0))
-                ],
-            )
+        if msg.data != self.prev_message:
+            if msg.data:
+                trajectory = JointTrajectory(
+                    joint_names=[
+                        "elbow_joint",
+                        "shoulder_lift_joint",
+                        "shoulder_pan_joint",
+                        "wrist_1_joint",
+                        "wrist_2_joint",
+                        "wrist_3_joint",
+                    ],
+                    points=[
+                        JointTrajectoryPoint(positions=[0.5235988, -0.5235988, 0, -1.570796, -1.570796, 0], time_from_start=Duration(sec=6, nanosec=0))
+                        ],
+                )
+            else:
+                trajectory = JointTrajectory(
+                    joint_names=[
+                        "elbow_joint",
+                        "shoulder_lift_joint",
+                        "shoulder_pan_joint",
+                        "wrist_1_joint",
+                        "wrist_2_joint",
+                        "wrist_3_joint",
+                    ],
+                    points=[
+                        JointTrajectoryPoint(positions=[1.570796, -3.141593, 0, -1.570796, -1.570796, 0], time_from_start=Duration(sec=6, nanosec=0))
+                        ],
+                )
+            self.get_logger().info("Generated message = " + str(trajectory))
             self.jointPublisher.publish(trajectory)
-            self.prev_message = msg.value
+            self.prev_message = msg.data

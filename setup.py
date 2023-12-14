@@ -18,7 +18,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            "robot_mover = ur3e_aruco_controller.robot_mover:main"
+            "robot_mover = ur3e_aruco_controller.robot_mover:main",
+            "camera_read = ur3e_aruco_controller.camera_read:main"
         ],
     },
 )

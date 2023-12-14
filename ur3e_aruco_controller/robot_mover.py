@@ -1,11 +1,11 @@
 import rclpy
-from ur3e_aruco_controller.camera_node import CameraNode
+from ur3e_aruco_controller.robot_node import RobotNode
 
 def main(args=None):
     rclpy.init(args=args)
-    node = CameraNode()
-    rclpy.spin(node)
-    node.destroy_node()
+    robot_node = RobotNode()
+    rclpy.spin(robot_node)
+    robot_node.destroy_node()
     rclpy.shutdown()
 
 if __name__  == '__main__':
