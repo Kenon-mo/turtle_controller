@@ -29,10 +29,10 @@ class CameraNode(Node):
             self.create_timer(SPF, self.timer_callback)
 
     def declareAllParams(self):
-        self.declare_parameter("CameraFPS", "30")
-        self.declare_parameter("ShowPreview", "true")
+        self.declare_parameter("CameraFPS", 30)
+        self.declare_parameter("ShowPreview", True)
         self.declare_parameter("CameraDevice", "/dev/video0")
-        self.declare_parameter("ArUcoID", "0")
+        self.declare_parameter("ArUcoID", 0)
 
     def getAllParams(self):
         self.cameraFPS = self.get_parameter("CameraFPS")
