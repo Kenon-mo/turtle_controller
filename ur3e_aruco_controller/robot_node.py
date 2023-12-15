@@ -20,7 +20,7 @@ class RobotNode(Node):
     def subscription_callback(self, msg):
         if msg.data != self.prev_message:
             if msg.data:
-                trajectory = JointTrajectory(
+                trajectory = JointTrajectory( # moving forward if msg is true
                     joint_names=[
                         "elbow_joint",
                         "shoulder_lift_joint",
@@ -34,7 +34,7 @@ class RobotNode(Node):
                         ],
                 )
             else:
-                trajectory = JointTrajectory(
+                trajectory = JointTrajectory( # moving backward if msg is false
                     joint_names=[
                         "elbow_joint",
                         "shoulder_lift_joint",
@@ -47,6 +47,5 @@ class RobotNode(Node):
                         JointTrajectoryPoint(positions=[1.570796, -3.141593, 0, -1.570796, -1.570796, 0], time_from_start=Duration(sec=6, nanosec=0))
                         ],
                 )
-            self.get_logger().info("Generated message = " + str(trajectory))
             self.jointPublisher.publish(trajectory)
             self.prev_message = msg.data
